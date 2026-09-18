@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PocketBiz</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      padding: 16px;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h1 { margin: 0; font-size: 1.2rem; color: var(--accent); }
+    .container { padding: 16px; flex: 1; max-width: 500px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-title { font-size: 0.8rem; color: var(--text-muted); }
+    .stat-value { font-size: 1.4rem; font-weight: bold; margin-top: 4px; }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .form-group { margin-bottom: 12px; text-align: right; }
+    label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-color);
+      color: var(--text);
+      box-sizing: border-box;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-around;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      padding: 12px 0;
+      position: sticky;
+      bottom: 0;
+    }
+    .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; }
+    .nav-item.active { color: var(--accent); font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>POCKETBIZ</h1>
+    <span style="font-size: 0.85rem; color: var(--text-muted);">مساء الخير 👋</span>
+  </header>
+
+  <div class="container">
+    <div class="card stats-grid">
+      <div>
+        <div class="stat-title">مبيعات اليوم</div>
+        <div class="stat-value" id="todaySales">$0.00</div>
+      </div>
+      <div>
+        <div class="stat-title">أرباح اليوم</div>
+        <div class="stat-value" id="todayProfit" style="color: var(--accent);">$0.00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;">تسجيل عملية جديدة</h3>
+      <div class="form-group">
+        <label>المنتج / الخدمة</label>
+        <input type="text" id="prodName" placeholder="مثلاً: Hair treatment">
+      </div>
+      <div class="form-group">
+        <label>التكلفة (Cost $)</label>
+        <input type="number" id="prodCost" placeholder="10">
+      </div>
+      <div class="form-group">
+        <label>سعر البيع (Selling Price $)</label>
+        <input type="number" id="prodCost" placeholder="25" id="prodPrice">
+      </div>
+      <div class="form-group">
+        <label>الكمية</label>
+        <input type="number" id="prodQty" value="1">
+      </div>
+      <button class="btn" onclick="addSale()">+ حفظ المبيعات</button>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;">النشاط الأخير</h3>
+      <div id="activityList" style="color: var(--text-muted); font-size: 0.9rem;">
+        لا توجد معاملات بعد
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="#" class="nav-item active">الرئيسية</a>
+    <a href="#" class="nav-item">المبيعات</a>
+    <a href="#" class="nav-item">الزبائن</a>
+    <a href="#" class="nav-item">التقارير</a>
+  </nav>
+
+  <script>
+    let sales = JSON.parse(localStorage.getItem('pb_sales') || '[]');
+
+    function updateDashboard() {
+      let totalSales = sales.reduce((acc, item) => acc + item.revenue, 0);
+      let totalProfit = sales.reduce((acc, item) => acc + item.profit, 0);
+
+      document.getElementById('todaySales').innerText = `$${totalSales.toFixed(2)}`;
+      document.getElementById('todayProfit').innerText = `$${totalProfit.toFixed(2)}`;
+
+      let listHtml = '';
+      if (sales.length === 0) {
+        listHtml = 'لا توجد معاملات بعد';
+      } else {
+        sales.slice().reverse().forEach(s => {
+          listHtml += `<div style="padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+            <div><b>${s.name}</b> (x${s.qty})</div>
+            <div><span style="color: var(--accent);">+$${s.revenue}</span> (ربح: $${s.profit})</div>
+          </div>`;
+        });
+      }
+      document.getElementById('activityList').innerHTML = listHtml;
+    }
+
+    function addSale() {
+      const name = document.getElementById('prodName').value || 'خدمة/منتج';
+      const cost = parseFloat(document.getElementById('prodCost').value) || 0;
+      const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+      const qty = parseInt(document.getElementById('prodQty').value) || 1;
+
+      const revenue = price * qty;
+      const totalCost = cost * qty;
+      const profit = revenue - totalCost;
+
+      sales.push({ name, cost: totalCost, price, qty, revenue, profit, date: new Date().toISOString() });
+      localStorage.setItem('pb_sales', JSON.stringify(sales));
+
+      document.getElementById('prodName').value = '';
+      document.getElementById('prodCost').value = '';
+      document.getElementById('prodPrice').value = '';
+      document.getElementById('prodQty').value = '1';
+
+      updateDashboard();
+    }
+
+    updateDashboard();
+  </script>
+</body>
+</html>
