@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#10b981">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/192/10149/10149458.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
   <title>PocketBiz</title>
   <style>
     :root {
@@ -45,7 +45,7 @@
     }
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .stat-title { font-size: 0.8rem; color: var(--text-muted); }
-    .stat-value { font-size: 1.4rem; font-weight: bold; margin-top: 4px; }
+    .stat-value { font-size: 1.3rem; font-weight: bold; margin-top: 4px; }
     .btn {
       width: 100%;
       padding: 12px;
@@ -58,10 +58,11 @@
       cursor: pointer;
       margin-top: 8px;
     }
+    .btn-danger { background: var(--danger); color: #fff; }
     .btn-wa { background: #25d366; color: #fff; }
     .form-group { margin-bottom: 12px; text-align: right; }
     label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
-    input {
+    input, select {
       width: 100%;
       padding: 10px;
       border-radius: 6px;
@@ -102,24 +103,28 @@
 
   <header>
     <h1>POCKETBIZ</h1>
-    <span style="font-size: 0.85rem; color: var(--text-muted);">أهلاً بك 👋</span>
+    <span style="font-size: 0.85rem; color: var(--text-muted);" id="rateDisplay">1$ = 89,500 LBP</span>
   </header>
 
   <div class="container">
+    
+    <!-- Tab 1: الرئيسية والمبيعات -->
     <div id="tab-home" class="tab-content active">
       <div class="card stats-grid">
         <div>
           <div class="stat-title">مبيعات اليوم</div>
           <div class="stat-value" id="todaySales">$0.00</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);" id="todaySalesLbp">0 LBP</div>
         </div>
         <div>
-          <div class="stat-title">أرباح اليوم</div>
+          <div class="stat-title">صافي الأرباح</div>
           <div class="stat-value" id="todayProfit" style="color: var(--accent);">$0.00</div>
+          <div style="font-size:0.75rem; color:var(--accent);" id="todayProfitLbp">0 LBP</div>
         </div>
       </div>
 
       <div class="card">
-        <h3 style="margin-top:0;">تسجيل عملية جديدة</h3>
+        <h3 style="margin-top:0;">تسجيل عملية بيع جديدة</h3>
         <div class="form-group">
           <label>اسم الزبون</label>
           <input type="text" id="custName" placeholder="مثلاً: Maria">
@@ -150,17 +155,54 @@
       </div>
     </div>
 
+    <!-- Tab 2: المصاريف -->
+    <div id="tab-expenses" class="tab-content">
+      <div class="card">
+        <h3 style="margin-top:0;">تسجيل مصروف جديد</h3>
+        <div class="form-group">
+          <label>بيان المصروف</label>
+          <input type="text" id="expTitle" placeholder="مثلاً: اشتراك كهرباء / إيجار">
+        </div>
+        <div class="form-group">
+          <label>المبلغ ($)</label>
+          <input type="number" id="expAmount" placeholder="15">
+        </div>
+        <button class="btn btn-danger" onclick="addExpense()">+ تسجيل المصروف</button>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">سجل المصاريف</h3>
+        <div id="expensesList">لا توجد مصاريف مسجلة</div>
+      </div>
+    </div>
+
+    <!-- Tab 3: الزبائن -->
     <div id="tab-customers" class="tab-content">
       <div class="card">
         <h3 style="margin-top:0;">حسابات الزبائن والديون</h3>
         <div id="customersList">لا يوجد زبائن بعد</div>
       </div>
     </div>
+
+    <!-- Tab 4: الإعدادات والتقارير -->
+    <div id="tab-settings" class="tab-content">
+      <div class="card">
+        <h3 style="margin-top:0;">إعدادات العملة والصرف</h3>
+        <div class="form-group">
+          <label>سعر صرف الدولار (LBP)</label>
+          <input type="number" id="exchangeRate" value="89500">
+        </div>
+        <button class="btn" onclick="saveRate()">حفظ سعر الصرف</button>
+      </div>
+    </div>
+
   </div>
 
   <nav class="nav">
-    <button class="nav-btn active" onclick="switchTab('home')">الرئيسية</button>
-    <button class="nav-btn" onclick="switchTab('customers')">الزبائن والديون</button>
+    <button class="nav-btn active" onclick="switchTab('home', this)">المبيعات</button>
+    <button class="nav-btn" onclick="switchTab('expenses', this)">المصاريف</button>
+    <button class="nav-btn" onclick="switchTab('customers', this)">الزبائن</button>
+    <button class="nav-btn" onclick="switchTab('settings', this)">الإعدادات</button>
   </nav>
 
   <script>
@@ -169,28 +211,43 @@
     }
 
     let sales = JSON.parse(localStorage.getItem('pb_sales') || '[]');
+    let expenses = JSON.parse(localStorage.getItem('pb_expenses') || '[]');
+    let rate = parseFloat(localStorage.getItem('pb_rate') || '89500');
     let lastInvoice = null;
 
-    function switchTab(tab) {
+    document.getElementById('exchangeRate').value = rate;
+    document.getElementById('rateDisplay').innerText = `1$ = ${rate.toLocaleString()} LBP`;
+
+    function switchTab(tab, btn) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
       
-      if (tab === 'home') {
-        document.getElementById('tab-home').classList.add('active');
-        event.target.classList.add('active');
-      } else {
-        document.getElementById('tab-customers').classList.add('active');
-        event.target.classList.add('active');
-        renderCustomers();
-      }
+      document.getElementById('tab-' + tab).classList.add('active');
+      btn.classList.add('active');
+
+      if (tab === 'customers') renderCustomers();
+      if (tab === 'expenses') renderExpenses();
+    }
+
+    function saveRate() {
+      rate = parseFloat(document.getElementById('exchangeRate').value) || 89500;
+      localStorage.setItem('pb_rate', rate);
+      document.getElementById('rateDisplay').innerText = `1$ = ${rate.toLocaleString()} LBP`;
+      updateDashboard();
+      alert('تم حفظ سعر الصرف بنجاح');
     }
 
     function updateDashboard() {
       let totalSales = sales.reduce((acc, item) => acc + item.revenue, 0);
-      let totalProfit = sales.reduce((acc, item) => acc + item.profit, 0);
+      let totalCost = sales.reduce((acc, item) => acc + item.cost, 0);
+      let totalExp = expenses.reduce((acc, item) => acc + item.amount, 0);
+      let netProfit = (totalSales - totalCost) - totalExp;
 
       document.getElementById('todaySales').innerText = `$${totalSales.toFixed(2)}`;
-      document.getElementById('todayProfit').innerText = `$${totalProfit.toFixed(2)}`;
+      document.getElementById('todaySalesLbp').innerText = `${Math.round(totalSales * rate).toLocaleString()} LBP`;
+
+      document.getElementById('todayProfit').innerText = `$${netProfit.toFixed(2)}`;
+      document.getElementById('todayProfitLbp').innerText = `${Math.round(netProfit * rate).toLocaleString()} LBP`;
     }
 
     function addSale() {
@@ -214,7 +271,7 @@
         <b>POCKETBIZ INVOICE</b><br>
         الزبون: ${customer}<br>
         الخدمة: ${name}<br>
-        السعر: $${price}<br>
+        السعر: $${price} (${Math.round(price * rate).toLocaleString()} LBP)<br>
         المدفوع: $${paid}<br>
         <b>المتبقي: $${remaining}</b>
       `;
@@ -228,12 +285,39 @@
       updateDashboard();
     }
 
+    function addExpense() {
+      const title = document.getElementById('expTitle').value || 'مصروف عام';
+      const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+
+      if (amount <= 0) return;
+
+      expenses.push({ title, amount, date: new Date().toLocaleDateString() });
+      localStorage.setItem('pb_expenses', JSON.stringify(expenses));
+
+      document.getElementById('expTitle').value = '';
+      document.getElementById('expAmount').value = '';
+
+      renderExpenses();
+      updateDashboard();
+    }
+
+    function renderExpenses() {
+      let html = '';
+      expenses.slice().reverse().forEach(e => {
+        html += `<div style="padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+          <div><b>${e.title}</b><br><small style="color: var(--text-muted);">${e.date}</small></div>
+          <div style="color: var(--danger); font-weight: bold;">-$${e.amount}</div>
+        </div>`;
+      });
+      document.getElementById('expensesList').innerHTML = html || 'لا توجد مصاريف مسجلة';
+    }
+
     function shareWhatsApp() {
       if (!lastInvoice) return;
       const text = `🧾 *فاتورة من POCKETBIZ*%0A` +
                    `الزبون: ${lastInvoice.customer}%0A` +
                    `الخدمة/المنتج: ${lastInvoice.name}%0A` +
-                   `المبلغ الإجمالي: $${lastInvoice.price}%0A` +
+                   `المبلغ الإجمالي: $${lastInvoice.price} (${Math.round(lastInvoice.price * rate).toLocaleString()} LBP)%0A` +
                    `المدفوع: $${lastInvoice.paid}%0A` +
                    `*المتبقي: $${lastInvoice.remaining}*%0A` +
                    `شكراً لتعاملكم معنا ❤️`;
