@@ -287,8 +287,19 @@
 
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    reg.onupdatefound = () => {
+      const installingWorker = reg.installing;
+      installingWorker.onstatechange = () => {
+        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // تحديث تلقائي صامت بدون إزعاج الزبون
+          window.location.reload();
+        }
+      };
+    };
+  });
+}
+
 
     let sales = JSON.parse(localStorage.getItem('pb_sales') || '[]');
     let expenses = JSON.parse(localStorage.getItem('pb_expenses') || '[]');
