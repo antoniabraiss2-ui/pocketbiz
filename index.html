@@ -58,6 +58,7 @@
       cursor: pointer;
       margin-top: 8px;
     }
+    .btn-secondary { background: #334155; color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-wa { background: #25d366; color: #fff; }
     .form-group { margin-bottom: 12px; text-align: right; }
@@ -97,6 +98,26 @@
       margin-top: 12px;
       background: #022c22;
     }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-color);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+    .qty-btn {
+      background: var(--border);
+      color: #fff;
+      border: none;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -108,7 +129,7 @@
 
   <div class="container">
     
-    <!-- Tab 1: الرئيسية والمبيعات -->
+    <!-- Tab 1: المبيعات الفورية السريعة -->
     <div id="tab-home" class="tab-content active">
       <div class="card stats-grid">
         <div>
@@ -124,28 +145,38 @@
       </div>
 
       <div class="card">
-        <h3 style="margin-top:0;">تسجيل عملية بيع جديدة</h3>
+        <h3 style="margin-top:0;">فاتورة جديدة</h3>
+        
         <div class="form-group">
           <label>اسم الزبون</label>
           <input type="text" id="custName" placeholder="مثلاً: Maria">
         </div>
+
+        <!-- اختياري سريعة بلمسة واحدة من القائمة -->
         <div class="form-group">
-          <label>المنتج / الخدمة</label>
-          <input type="text" id="prodName" placeholder="مثلاً: Hair treatment">
+          <label>➕ اختر منتج ينزل دغري بالفاتورة:</label>
+          <select id="itemSelect" onchange="quickAddToCart(this)">
+            <option value="">-- اضغط هنا لإضافة منتج فورا --</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label>التكلفة (Cost $)</label>
-          <input type="number" id="prodCost" placeholder="10">
+
+        <!-- قائمة العناصر المضافة بالفاتورة وحسابها المباشر -->
+        <div id="cartSection" style="display:none; margin-bottom: 12px; border-top:1px solid var(--border); padding-top:10px;">
+          <label style="color:var(--accent);">محتويات الفاتورة الحالية:</label>
+          <div id="cartList"></div>
+          
+          <div style="background:#022c22; padding:10px; border-radius:8px; margin-top:10px;">
+            <div style="font-size:1.1rem; font-weight:bold; color:var(--accent);" id="cartTotal">المجموع: $0.00</div>
+            <div style="font-size:0.85rem; color:var(--text-muted);" id="cartTotalLbp">0 LBP</div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>سعر البيع (Price $)</label>
-          <input type="number" id="prodPrice" placeholder="25">
-        </div>
+
         <div class="form-group">
           <label>المبلغ المدفوع ($)</label>
-          <input type="number" id="paidAmount" placeholder="20">
+          <input type="number" id="paidAmount" placeholder="المبلغ المستلم من الزبون">
         </div>
-        <button class="btn" onclick="addSale()">+ حفظ الفاتورة</button>
+
+        <button class="btn" onclick="addSale()">+ حفظ الفاتورة وإتمام العملية</button>
       </div>
 
       <div id="invoicePreview" class="card" style="display:none;">
@@ -155,7 +186,34 @@
       </div>
     </div>
 
-    <!-- Tab 2: المصاريف -->
+    <!-- Tab 2: الكتالوج -->
+    <div id="tab-catalog" class="tab-content">
+      <div class="card">
+        <h3 style="margin-top:0;">إضافة منتج / خدمة للكتالوج</h3>
+        <div class="form-group">
+          <label>اسم المنتج أو الخدمة</label>
+          <input type="text" id="catTitle" placeholder="مثلاً: Hair Treatment">
+        </div>
+        <div class="stats-grid">
+          <div class="form-group">
+            <label>التكلفة ($)</label>
+            <input type="number" id="catCost" placeholder="10">
+          </div>
+          <div class="form-group">
+            <label>سعر البيع ($)</label>
+            <input type="number" id="catPrice" placeholder="25">
+          </div>
+        </div>
+        <button class="btn" onclick="addCatalogItem()">+ حفظ في الكتالوج</button>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">قائمة المنتجات المسجلة</h3>
+        <div id="catalogList">لا توجد عناصر مسجلة بعد</div>
+      </div>
+    </div>
+
+    <!-- Tab 3: المصاريف -->
     <div id="tab-expenses" class="tab-content">
       <div class="card">
         <h3 style="margin-top:0;">تسجيل مصروف جديد</h3>
@@ -176,15 +234,36 @@
       </div>
     </div>
 
-    <!-- Tab 3: الزبائن -->
+    <!-- Tab 4: الزبائن والأرشيف وردهم للديون -->
     <div id="tab-customers" class="tab-content">
       <div class="card">
         <h3 style="margin-top:0;">حسابات الزبائن والديون</h3>
         <div id="customersList">لا يوجد زبائن بعد</div>
       </div>
+
+      <!-- تفاصيل أرشيف الزبون -->
+      <div id="customerDetailCard" class="card" style="display:none;">
+        <button class="btn btn-secondary" style="margin-bottom:12px;" onclick="closeCustomerDetails()">← العودة للزبائن</button>
+        <h3 style="margin-top:0; color:var(--accent);" id="cdName">أرشيف الزبون</h3>
+        
+        <div style="background:var(--bg-color); padding:10px; border-radius:8px; margin-bottom:12px;">
+          <div>إجمالي المشتريات: <b id="cdTotal">$0</b></div>
+          <div>إجمالي المدفوع: <b id="cdPaid">$0</b></div>
+          <div>المتبقي (الدين): <b id="cdRemaining" style="color:var(--danger);">$0</b></div>
+        </div>
+
+        <div class="form-group" style="border-top:1px solid var(--border); padding-top:10px;">
+          <label>تسديد دفعة من الدين ($)</label>
+          <input type="number" id="payDebtInput" placeholder="أدخل المبلغ المسدد">
+          <button class="btn" style="margin-top:6px;" onclick="submitDebtPayment()">تسجيل الدفعة</button>
+        </div>
+
+        <h4>سجل العمليات السابقة:</h4>
+        <div id="cdHistory"></div>
+      </div>
     </div>
 
-    <!-- Tab 4: الإعدادات والتقارير -->
+    <!-- Tab 5: الإعدادات -->
     <div id="tab-settings" class="tab-content">
       <div class="card">
         <h3 style="margin-top:0;">إعدادات العملة والصرف</h3>
@@ -200,6 +279,7 @@
 
   <nav class="nav">
     <button class="nav-btn active" onclick="switchTab('home', this)">المبيعات</button>
+    <button class="nav-btn" onclick="switchTab('catalog', this)">الكتالوج</button>
     <button class="nav-btn" onclick="switchTab('expenses', this)">المصاريف</button>
     <button class="nav-btn" onclick="switchTab('customers', this)">الزبائن</button>
     <button class="nav-btn" onclick="switchTab('settings', this)">الإعدادات</button>
@@ -212,8 +292,13 @@
 
     let sales = JSON.parse(localStorage.getItem('pb_sales') || '[]');
     let expenses = JSON.parse(localStorage.getItem('pb_expenses') || '[]');
+    let catalog = JSON.parse(localStorage.getItem('pb_catalog') || '[]');
+    let payments = JSON.parse(localStorage.getItem('pb_payments') || '[]');
     let rate = parseFloat(localStorage.getItem('pb_rate') || '89500');
+    
+    let currentCart = [];
     let lastInvoice = null;
+    let selectedCustomerForDetails = null;
 
     document.getElementById('exchangeRate').value = rate;
     document.getElementById('rateDisplay').innerText = `1$ = ${rate.toLocaleString()} LBP`;
@@ -225,7 +310,12 @@
       document.getElementById('tab-' + tab).classList.add('active');
       btn.classList.add('active');
 
-      if (tab === 'customers') renderCustomers();
+      if (tab === 'home') populateCatalogDropdown();
+      if (tab === 'catalog') renderCatalog();
+      if (tab === 'customers') {
+        closeCustomerDetails();
+        renderCustomers();
+      }
       if (tab === 'expenses') renderExpenses();
     }
 
@@ -237,119 +327,213 @@
       alert('تم حفظ سعر الصرف بنجاح');
     }
 
-    function updateDashboard() {
-      let totalSales = sales.reduce((acc, item) => acc + item.revenue, 0);
-      let totalCost = sales.reduce((acc, item) => acc + item.cost, 0);
-      let totalExp = expenses.reduce((acc, item) => acc + item.amount, 0);
-      let netProfit = (totalSales - totalCost) - totalExp;
+    /* إضافة فورية ومباشرة للسلة بدقة وبدون أزرار زيادة */
+    function populateCatalogDropdown() {
+      let select = document.getElementById('itemSelect');
+      select.innerHTML = '<option value="">-- اضغط هنا لإضافة منتج فورا --</option>';
+      catalog.forEach(item => {
+        select.innerHTML += `<option value="${item.id}">${item.title} - $${item.price}</option>`;
+      });
+    }
 
-      document.getElementById('todaySales').innerText = `$${totalSales.toFixed(2)}`;
-      document.getElementById('todaySalesLbp').innerText = `${Math.round(totalSales * rate).toLocaleString()} LBP`;
+    function quickAddToCart(selectEl) {
+      const id = parseFloat(selectEl.value);
+      if (!id) return;
 
-      document.getElementById('todayProfit').innerText = `$${netProfit.toFixed(2)}`;
-      document.getElementById('todayProfitLbp').innerText = `${Math.round(netProfit * rate).toLocaleString()} LBP`;
+      const item = catalog.find(i => i.id === id);
+      if (item) {
+        // فحص إذا كان المنتج موجود مسبقاً بالسلة لزيادة الكمية تلقائياً
+        const existing = currentCart.find(c => c.id === item.id);
+        if (existing) {
+          existing.qty += 1;
+        } else {
+          currentCart.push({ id: item.id, title: item.title, cost: item.cost, price: item.price, qty: 1 });
+        }
+        renderCart();
+      }
+      // إعادة خيار القائمة لوضعه الطبيعي لإمكانية اختيار المنتج التالي فوراً
+      selectEl.value = '';
+    }
+
+    function updateQty(index, delta) {
+      currentCart[index].qty += delta;
+      if (currentCart[index].qty <= 0) {
+        currentCart.splice(index, 1);
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartSection = document.getElementById('cartSection');
+      const cartList = document.getElementById('cartList');
+      if (currentCart.length === 0) {
+        cartSection.style.display = 'none';
+        document.getElementById('paidAmount').value = '';
+        return;
+      }
+      cartSection.style.display = 'block';
+      let html = '';
+      let totalCost = 0;
+      let totalPrice = 0;
+
+      currentCart.forEach((item, index) => {
+        const itemTotal = item.price * item.qty;
+        totalPrice += itemTotal;
+        totalCost += (item.cost * item.qty);
+
+        html += `<div class="cart-item">
+          <div>
+            <b>${item.title}</b><br>
+            <small style="color:var(--text-muted);">$${item.price} × ${item.qty} = <b>$${itemTotal}</b></small>
+          </div>
+          <div>
+            <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+            <span style="margin: 0 6px; font-weight:bold;">${item.qty}</span>
+            <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+          </div>
+        </div>`;
+      });
+
+      cartList.innerHTML = html;
+      document.getElementById('cartTotal').innerText = `المجموع الإجمالي: $${totalPrice.toFixed(2)}`;
+      document.getElementById('cartTotalLbp').innerText = `${Math.round(totalPrice * rate).toLocaleString()} LBP`;
+      
+      // تحديث المبلغ المدفوع تلقائياً بمجموع الفاتورة
+      document.getElementById('paidAmount').value = totalPrice;
     }
 
     function addSale() {
       const customer = document.getElementById('custName').value || 'زبون عام';
-      const name = document.getElementById('prodName').value || 'خدمة/منتج';
-      const cost = parseFloat(document.getElementById('prodCost').value) || 0;
-      const price = parseFloat(document.getElementById('prodPrice').value) || 0;
-      const paid = parseFloat(document.getElementById('paidAmount').value) || price;
+      if (currentCart.length === 0) {
+        alert('يرجى اختيار منتج واحد على الأقل من القائمة');
+        return;
+      }
 
-      const remaining = price - paid;
-      const profit = price - cost;
+      const totalPrice = currentCart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+      const totalCost = currentCart.reduce((acc, i) => acc + (i.cost * i.qty), 0);
+      const paid = parseFloat(document.getElementById('paidAmount').value);
+      const actualPaid = isNaN(paid) ? totalPrice : paid;
+      
+      const remaining = totalPrice - actualPaid;
+      const profit = totalPrice - totalCost;
 
-      const saleItem = { customer, name, cost, price, paid, remaining, profit, revenue: price, date: new Date().toLocaleDateString() };
+      const saleItem = {
+        id: Date.now(),
+        customer,
+        items: [...currentCart],
+        cost: totalCost,
+        price: totalPrice,
+        paid: actualPaid,
+        remaining,
+        profit,
+        revenue: totalPrice,
+        date: new Date().toLocaleDateString()
+      };
+
       sales.push(saleItem);
       localStorage.setItem('pb_sales', JSON.stringify(sales));
 
       lastInvoice = saleItem;
 
+      // إظهار معاينة الفاتورة
       document.getElementById('invoicePreview').style.display = 'block';
+      let itemsSummary = currentCart.map(i => `• ${i.title} (${i.qty}×) - $${i.price * i.qty}`).join('<br>');
+      
       document.getElementById('invoiceDetails').innerHTML = `
         <b>POCKETBIZ INVOICE</b><br>
-        الزبون: ${customer}<br>
-        الخدمة: ${name}<br>
-        السعر: $${price} (${Math.round(price * rate).toLocaleString()} LBP)<br>
-        المدفوع: $${paid}<br>
+        <b>الزبون:</b> ${customer}<br>
+        <b>المنتجات:</b><br>${itemsSummary}<br>
+        ------------------------<br>
+        <b>المجموع:</b> $${totalPrice} (${Math.round(totalPrice * rate).toLocaleString()} LBP)<br>
+        <b>المدفوع:</b> $${actualPaid}<br>
         <b>المتبقي: $${remaining}</b>
       `;
 
+      // تصفير السلة للعملية القادمة
+      currentCart = [];
+      renderCart();
       document.getElementById('custName').value = '';
-      document.getElementById('prodName').value = '';
-      document.getElementById('prodCost').value = '';
-      document.getElementById('prodPrice').value = '';
-      document.getElementById('paidAmount').value = '';
 
       updateDashboard();
     }
 
-    function addExpense() {
-      const title = document.getElementById('expTitle').value || 'مصروف عام';
-      const amount = parseFloat(document.getElementById('expAmount').value) || 0;
-
-      if (amount <= 0) return;
-
-      expenses.push({ title, amount, date: new Date().toLocaleDateString() });
-      localStorage.setItem('pb_expenses', JSON.stringify(expenses));
-
-      document.getElementById('expTitle').value = '';
-      document.getElementById('expAmount').value = '';
-
-      renderExpenses();
-      updateDashboard();
-    }
-
-    function renderExpenses() {
-      let html = '';
-      expenses.slice().reverse().forEach(e => {
-        html += `<div style="padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
-          <div><b>${e.title}</b><br><small style="color: var(--text-muted);">${e.date}</small></div>
-          <div style="color: var(--danger); font-weight: bold;">-$${e.amount}</div>
-        </div>`;
-      });
-      document.getElementById('expensesList').innerHTML = html || 'لا توجد مصاريف مسجلة';
-    }
-
-    function shareWhatsApp() {
-      if (!lastInvoice) return;
-      const text = `🧾 *فاتورة من POCKETBIZ*%0A` +
-                   `الزبون: ${lastInvoice.customer}%0A` +
-                   `الخدمة/المنتج: ${lastInvoice.name}%0A` +
-                   `المبلغ الإجمالي: $${lastInvoice.price} (${Math.round(lastInvoice.price * rate).toLocaleString()} LBP)%0A` +
-                   `المدفوع: $${lastInvoice.paid}%0A` +
-                   `*المتبقي: $${lastInvoice.remaining}*%0A` +
-                   `شكراً لتعاملكم معنا ❤️`;
-      
-      window.open(`https://wa.me/?text=${text}`, '_blank');
-    }
-
+    /* سجل الزبائن وتسديد الديون */
     function renderCustomers() {
       let custMap = {};
+      
       sales.forEach(s => {
         if (!custMap[s.customer]) {
-          custMap[s.customer] = { total: 0, paid: 0, remaining: 0 };
+          custMap[s.customer] = { total: 0, paid: 0, remaining: 0, count: 0 };
         }
         custMap[s.customer].total += s.price;
         custMap[s.customer].paid += s.paid;
         custMap[s.customer].remaining += s.remaining;
+        custMap[s.customer].count += 1;
+      });
+
+      payments.forEach(p => {
+        if (custMap[p.customer]) {
+          custMap[p.customer].paid += p.amount;
+          custMap[p.customer].remaining -= p.amount;
+        }
       });
 
       let html = '';
       for (let c in custMap) {
         let remColor = custMap[c].remaining > 0 ? 'var(--danger)' : 'var(--accent)';
-        html += `<div style="padding: 10px 0; border-bottom: 1px solid var(--border);">
-          <b>👤 ${c}</b><br>
-          <small style="color: var(--text-muted);">مجموع الحساب: $${custMap[c].total} | المدفوع: $${custMap[c].paid}</small><br>
-          <span style="color: ${remColor}; font-weight: bold;">المتبقي: $${custMap[c].remaining}</span>
+        html += `<div style="padding: 12px 0; border-bottom: 1px solid var(--border); cursor:pointer;" onclick="openCustomerDetails('${c}')">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b>👤 ${c} <small style="color:var(--text-muted);">(${custMap[c].count} عمليات)</small></b>
+            <span style="color:var(--accent); font-size:0.8rem;">عرض التفاصيل ➔</span>
+          </div>
+          <small style="color: var(--text-muted);">المجموع: $${custMap[c].total} | المدفوع: $${custMap[c].paid}</small><br>
+          <span style="color: ${remColor}; font-weight: bold;">المتبقي (الدين): $${custMap[c].remaining}</span>
         </div>`;
       }
 
       document.getElementById('customersList').innerHTML = html || 'لا يوجد زبائن بعد';
     }
 
-    updateDashboard();
-  </script>
-</body>
-</html>
+    function openCustomerDetails(custName) {
+      selectedCustomerForDetails = custName;
+      document.getElementById('customersList').style.display = 'none';
+      document.getElementById('customerDetailCard').style.display = 'block';
+
+      document.getElementById('cdName').innerText = `👤 أرشيف الزبون: ${custName}`;
+
+      let custSales = sales.filter(s => s.customer === custName);
+      let custPayments = payments.filter(p => p.customer === custName);
+
+      let total = custSales.reduce((acc, s) => acc + s.price, 0);
+      let initialPaid = custSales.reduce((acc, s) => acc + s.paid, 0);
+      let debtPaid = custPayments.reduce((acc, p) => acc + p.amount, 0);
+      let totalPaid = initialPaid + debtPaid;
+      let remaining = total - totalPaid;
+
+      document.getElementById('cdTotal').innerText = `$${total}`;
+      document.getElementById('cdPaid').innerText = `$${totalPaid}`;
+      document.getElementById('cdRemaining').innerText = `$${remaining}`;
+
+      let historyHtml = '';
+      custSales.forEach(s => {
+        let itemsList = s.items ? s.items.map(i => `${i.title} (${i.qty}×)`).join(', ') : s.name;
+        historyHtml += `<div style="padding:8px; background:var(--bg-color); border-radius:6px; margin-bottom:8px;">
+          <small style="color:var(--text-muted);">${s.date}</small><br>
+          <b>فاتورة: ${itemsList}</b><br>
+          <small>المبلغ: $${s.price} | المدفوع وقتها: $${s.paid}</small>
+        </div>`;
+      });
+
+      custPayments.forEach(p => {
+        historyHtml += `<div style="padding:8px; background:#022c22; border:1px solid var(--accent); border-radius:6px; margin-bottom:8px;">
+          <small style="color:var(--text-muted);">${p.date}</small><br>
+          <b style="color:var(--accent);">💵 تسديد دفعة: $${p.amount}</b>
+        </div>`;
+      });
+
+      document.getElementById('cdHistory').innerHTML = historyHtml || 'لا يوجد سجل سابق';
+    }
+
+    function submitDebtPayment() {
+      if (!selectedCustomerForDetails) return;
+      const amount = parseFloat(document.getElement
