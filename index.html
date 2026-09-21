@@ -508,3 +508,130 @@
           <small style="color:var(--text-muted);">${s.date}</small><br>
           <b>فاتورة: ${itemsList}</b><br>
           <smal
+l>المبلغ: $${s.price} | المدفوع وقتها: $${s.paid}</small>
+        </div>`;
+      });
+
+      custPayments.forEach(p => {
+        historyHtml += `<div style="padding:8px; background:#022c22; border:1px solid var(--accent); border-radius:6px; margin-bottom:8px;">
+          <small style="color:var(--text-muted);">${p.date}</small><br>
+          <b style="color:var(--accent);">💵 تسديد دفعة: $${p.amount}</b>
+        </div>`;
+      });
+
+      document.getElementById('cdHistory').innerHTML = historyHtml || 'لا يوجد سجل سابق';
+    }
+
+    function submitDebtPayment() {
+      if (!selectedCustomerForDetails) return;
+      const amount = parseFloat(document.getElementById('payDebtInput').value) || 0;
+      if (amount <= 0) { alert('أدخل مبلغاً صحيحاً'); return; }
+
+      payments.push({ customer: selectedCustomerForDetails, amount, date: new Date().toLocaleDateString() });
+      localStorage.setItem(getKey('payments'), JSON.stringify(payments));
+      document.getElementById('payDebtInput').value = '';
+      openCustomerDetails(selectedCustomerForDetails);
+      alert('تم تسجيل الدفعة بنجاح!');
+    }
+
+    function closeCustomerDetails() {
+      selectedCustomerForDetails = null;
+      document.getElementById('customerDetailCard').style.display = 'none';
+      document.getElementById('customersList').style.display = 'block';
+    }
+
+    function addCatalogItem() {
+      const title = document.getElementById('catTitle').value;
+      const cost = parseFloat(document.getElementById('catCost').value) || 0;
+      const price = parseFloat(document.getElementById('catPrice').value) || 0;
+
+      if (!title) { alert('يرجى إدخال اسم المنتج'); return; }
+
+      catalog.push({ id: Date.now(), title, cost, price });
+      localStorage.setItem(getKey('catalog'), JSON.stringify(catalog));
+
+      document.getElementById('catTitle').value = '';
+      document.getElementById('catCost').value = '';
+      document.getElementById('catPrice').value = '';
+
+      renderCatalog();
+      populateCatalogDropdown();
+    }
+
+    function deleteCatalogItem(id) {
+      catalog = catalog.filter(item => item.id !== id);
+      localStorage.setItem(getKey('catalog'), JSON.stringify(catalog));
+      renderCatalog();
+      populateCatalogDropdown();
+    }
+
+    function renderCatalog() {
+      let html = '';
+      catalog.forEach(item => {
+        html += `<div style="padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <b>${item.title}</b><br>
+            <small style="color: var(--text-muted);">التكلفة: $${item.cost} | البيع: $${item.price}</small>
+          </div>
+          <button style="background:var(--danger); color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="deleteCatalogItem(${item.id})">حذف</button>
+        </div>`;
+      });
+      document.getElementById('catalogList').innerHTML = html || 'لا توجد عناصر مسجلة بعد';
+    }
+
+    function updateDashboard() {
+      let totalSales = sales.reduce((acc, item) => acc + item.revenue, 0);
+      let totalCost = sales.reduce((acc, item) => acc + item.cost, 0);
+      let totalExp = expenses.reduce((acc, item) => acc + item.amount, 0);
+      let netProfit = (totalSales - totalCost) - totalExp;
+
+      document.getElementById('todaySales').innerText = `$${totalSales.toFixed(2)}`;
+      document.getElementById('todaySalesLbp').innerText = `${Math.round(totalSales * rate).toLocaleString()} LBP`;
+      document.getElementById('todayProfit').innerText = `$${netProfit.toFixed(2)}`;
+      document.getElementById('todayProfitLbp').innerText = `${Math.round(netProfit * rate).toLocaleString()} LBP`;
+    }
+
+    function addExpense() {
+      const title = document.getElementById('expTitle').value || 'مصروف عام';
+      const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+      if (amount <= 0) return;
+
+      expenses.push({ title, amount, date: new Date().toLocaleDateString() });
+      localStorage.setItem(getKey('expenses'), JSON.stringify(expenses));
+
+      document.getElementById('expTitle').value = '';
+      document.getElementById('expAmount').value = '';
+      renderExpenses();
+      updateDashboard();
+    }
+
+    function renderExpenses() {
+      let html = '';
+      expenses.slice().reverse().forEach(e => {
+        html += `<div style="padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+          <div><b>${e.title}</b><br><small style="color: var(--text-muted);">${e.date}</small></div>
+          <div style="color: var(--danger); font-weight: bold;">-$${e.amount}</div>
+        </div>`;
+      });
+      document.getElementById('expensesList').innerHTML = html || 'لا توجد مصاريف مسجلة';
+    }
+
+    function shareWhatsApp() {
+      if (!lastInvoice) return;
+      let itemsSummary = lastInvoice.items ? lastInvoice.items.map(i => `${i.title} (${i.qty}×) - $${i.price * i.qty}`).join('%0A • ') : '';
+      
+      const text = `🧾 *فاتورة من POCKETBIZ*%0A` +
+                   `الزبون: ${lastInvoice.customer}%0A` +
+                   `المنتجات:%0A • ${itemsSummary}%0A` +
+                   `المجموع: $${lastInvoice.price} (${Math.round(lastInvoice.price * rate).toLocaleString()} LBP)%0A` +
+                   `المدفوع: $${lastInvoice.paid}%0A` +
+                   `*المتبقي: $${lastInvoice.remaining}*%0A` +
+                   `شكراً لتعاملكم معنا ❤️`;
+      
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
