@@ -14,9 +14,15 @@
   "categories": ["business", "finance", "productivity"],
   "icons": [
     {
-      "src": "icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "192x192 512x512",
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAARlSURBVHhe7d0xTsMwAIVhYmAFI3sEJA4C4ghI3AE34ASsI9yAByA2dm7AG3CEmRhYWRkYYIipm1R11fafeX/p0yL1O9urU5ukEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAP3S16Xpvu3p2td3a/r3p3u/i153tu3v26r3vA7yC712v33f9fde/L8u09q1d/x9f/+/9/P00/2/5e73e92/1fX/u9wA38H3Xv+/7m/suy/Lu5jEud43f9x73uT3e7+f33f9eA/iA6zM8v2P5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cA9vUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA3f0BLAECAMFm23MAAAAASUVORK5CYII=",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAARlSURBVHhe7d0xTsMwAIVhYmAFI3sEJA4C4ghI3AE34ASsI9yAByA2dm7AG3CEmRhYWRkYYIipm1R11fafeX/p0yL1O9urU5ukEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAP3S16Xpvu3p2td3a/r3p3u/i153tu3v26r3vA7yC712v33f9fde/L8u09q1d/x9f/+/9/P00/2/5e73e92/1fX/u9wA38H3Xv+/7m/suy/Lu5jEud43f9x73uT3e7+f33f9eA/iA6zM8v2P5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cAt3H/m9S/6frzfZf/I39/X2f5O6+/e/2x+/83/5p/v///5v8/f8/f8/cA9vUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA3f0BLAECAMFm23MAAAAASUVORK5CYII=",
+      "type": "image/png",
+      "sizes": "512x512",
       "purpose": "any"
     }
   ]
